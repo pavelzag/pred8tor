@@ -1,4 +1,3 @@
-import getpass
 import logging
 import os
 import platform
@@ -7,20 +6,17 @@ import sys
 import kubernetes.config
 from kubernetes.client import ApiClient
 
-KUBECONFIG_TEMP_PATH = f'/Users/{getpass.getuser()}/.kube/temp_config'
-
+LOG_FILE_NAME = 'pred8tor.log'
 if 'macOS' in platform.platform():
     log_path = f'{os.getcwd()}'
-    file_name = 'agent_main.log'
 else:
     log_path = '/var/log/'
-    file_name = 'agent_main.log'
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
-        logging.FileHandler(f"{log_path}/{file_name}"),
+        logging.FileHandler(f"{log_path}/{LOG_FILE_NAME}"),
         logging.StreamHandler(sys.stdout)
     ]
 )
@@ -46,5 +42,3 @@ class K8sApiClient:
                     logging.info(f'Loading configuration for {self.context_name} context name')
                     api_client = kubernetes.config.new_client_from_config(context=self.context_name)
                     return api_client
-            api_client = kubernetes.config.new_client_from_config(config_file=KUBECONFIG_TEMP_PATH)
-            return api_client

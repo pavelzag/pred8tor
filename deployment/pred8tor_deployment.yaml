@@ -19,7 +19,40 @@ spec:
       labels:
         app: pred8tor
     spec:
+      serviceAccountName: pred8tor
       containers:
       - name: pred8tor
         image: pavelzagalsky/pred8tor:1.0.0
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pred8tor
+  namespace: pred8tor
+automountServiceAccountToken: true
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pred8tor
+rules:
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pred8tor
+subjects:
+- kind: ServiceAccount
+  name: pred8tor
+  namespace: pred8tor
+roleRef:
+  kind: ClusterRole
+  name: pred8tor
+  apiGroup: rbac.authorization.k8s.io

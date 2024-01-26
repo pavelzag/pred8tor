@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: pred8tor
+  name: pred8tor-test
   labels:
     expiration_time: "1706263086"
 ---
@@ -10,7 +10,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-deployment
-  namespace: pred8tor
+  namespace: pred8tor-test
   labels:
     app: nginx
     expiration_time: "1706263086"
@@ -37,7 +37,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nginx-service
-  namespace: pred8tor
+  namespace: pred8tor-test
   labels:
     expiration_time: "1706263086"
 spec:
