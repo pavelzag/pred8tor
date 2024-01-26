@@ -16,4 +16,5 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build the Docker image
       run: cd app |
-        docker build . --file app/Dockerfile --tag pavelzagalsky/pred8tor:$(date +%s)
+        ls |
+        docker build . --file Dockerfile --tag pavelzagalsky/pred8tor:$(date +%s)
