@@ -10,14 +10,10 @@ from kubernetes import client, config
 
 from k8s_client.api_client import K8sApiClient
 
-config.load_kube_config()
-client_api = client.CoreV1Api()
-apps_api = client.AppsV1Api()
-
 if platform.system().upper() == 'DARWIN':
     log_file = pathlib.Path(os.getcwd(), 'pred8tor.log')
 else:
-    log_file = '/var/log/sample_app.log'
+    log_file = '/var/log/pred8tor.log'
 
 # Configure the logger to write to the log file and stdout
 logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
@@ -51,7 +47,7 @@ def delete_object(object_type: str, namespace: str, object_name: str, apps_api, 
                     grace_period_seconds=5  # Time to wait before shutting down
                 )
             )
-            logging.info(f"Deployment {object_name} deleted. Status: '{response.status}'")
+            logging.info(f"Deployment {object_name} deleted")
         elif object_type == POD:
             response = core_api.delete_namespaced_pod(name=object_name, namespace=namespace)
             logging.info(f"Pod {object_name} deleted. Status: {response.status}")
@@ -73,7 +69,7 @@ def main():
     parser.add_argument('--delete-service', action='store_true', help='Delete services', default=False)
     parser.add_argument('--delete-namespace', action='store_true', help='Delete namespaces', default=False)
     parser.add_argument('--debug-mode', action='store_true', help='Debug Mode', default=True)
-    parser.add_argument('--in-cluster-mode', action='store_true', help='InCluster Mode', default=False)
+    parser.add_argument('--in-cluster-mode', action='store_true', help='InCluster Mode', default=True)
     parser.add_argument('--context-name', action='store_true', help='Cluster Name', default="default")
 
     args = parser.parse_args()
@@ -85,51 +81,64 @@ def main():
 
     if args.delete_deployment or args.all_objects:
         logging.info("\nChecking labels for Deployments to delete:")
-        deployments = apps_api.list_deployment_for_all_namespaces(watch=False)
-        for dep in deployments.items:
-            if dep.metadata.labels is not None:
-                if EXPIRATION_TIME in dep.metadata.labels:
-                    if dep.metadata.labels['expiration_time'].isdigit():
-                        if has_time_passed(epoch_time=int(dep.metadata.labels['expiration_time'])):
-                            logging.info(f'Expiration time is up for {dep.metadata.name} {DEPLOYMENT}')
-                            delete_object(object_type=DEPLOYMENT, object_name=dep.metadata.name,
-                                          namespace=dep.metadata.namespace, apps_api=apps_api, core_api=core_api)
+        try:
+            deployments = apps_api.list_deployment_for_all_namespaces(watch=False)
+            for dep in deployments.items:
+                if dep.metadata.labels is not None:
+                    if EXPIRATION_TIME in dep.metadata.labels:
+                        if dep.metadata.labels['expiration_time'].isdigit():
+                            if has_time_passed(epoch_time=int(dep.metadata.labels['expiration_time'])):
+                                logging.info(f'Expiration time is up for {dep.metadata.name} {DEPLOYMENT}')
+                                delete_object(object_type=DEPLOYMENT, object_name=dep.metadata.name,
+                                              namespace=dep.metadata.namespace, apps_api=apps_api, core_api=core_api)
+        except client.exceptions.ApiException as e:
+            logging.error(f'Failed to fetch deployments due to {e}')
 
     if args.delete_pod or args.all_objects:
         logging.info("\nChecking labels for Namespace to delete:")
-        pods = core_api.list_pod_for_all_namespaces(watch=False)
-        for pod in pods.items:
-            if pod.metadata.labels is not None:
-                if EXPIRATION_TIME in pod.metadata.labels:
-                    if pod.metadata.labels['expiration_time'].isdigit():
-                        if has_time_passed(epoch_time=int(pod.metadata.labels['expiration_time'])):
-                            logging.info(f'Expiration time is up for {pod.metadata.name} {POD}')
-                            delete_object(object_type=POD, namespace=pod.metadata.namespace, object_name=pod.metadata.name,
-                                          apps_api=apps_api, core_api=core_api)
+        try:
+            pods = core_api.list_pod_for_all_namespaces(watch=False)
+            for pod in pods.items:
+                if pod.metadata.labels is not None:
+                    if EXPIRATION_TIME in pod.metadata.labels:
+                        if pod.metadata.labels['expiration_time'].isdigit():
+                            if has_time_passed(epoch_time=int(pod.metadata.labels['expiration_time'])):
+                                logging.info(f'Expiration time is up for {pod.metadata.name} {POD}')
+                                delete_object(object_type=POD, namespace=pod.metadata.namespace,
+                                              object_name=pod.metadata.name,
+                                              apps_api=apps_api, core_api=core_api)
+        except client.exceptions.ApiException as e:
+            logging.error(f'Failed to fetch pods due to {e}')
 
     if args.delete_service or args.all_objects:
         logging.info("\nChecking labels for Services to delete:")
-        services = core_api.list_service_for_all_namespaces(watch=False)
-        for svc in services.items:
-            if svc.metadata.labels is not None:
-                if EXPIRATION_TIME in svc.metadata.labels:
-                    if svc.metadata.labels['expiration_time'].isdigit():
-                        if has_time_passed(epoch_time=int(svc.metadata.labels['expiration_time'])):
-                            logging.info(f'Expiration time is up for {svc.metadata.name} {SERVICE}')
-                            delete_object(object_type=SERVICE, namespace=svc.metadata.namespace,
-                                          object_name=svc.metadata.name, apps_api=apps_api, core_api=core_api)
+        try:
+            services = core_api.list_service_for_all_namespaces(watch=False)
+            for svc in services.items:
+                if svc.metadata.labels is not None:
+                    if EXPIRATION_TIME in svc.metadata.labels:
+                        if svc.metadata.labels['expiration_time'].isdigit():
+                            if has_time_passed(epoch_time=int(svc.metadata.labels['expiration_time'])):
+                                logging.info(f'Expiration time is up for {svc.metadata.name} {SERVICE}')
+                                delete_object(object_type=SERVICE, namespace=svc.metadata.namespace,
+                                              object_name=svc.metadata.name, apps_api=apps_api, core_api=core_api)
+        except client.exceptions.ApiException as e:
+            logging.error(f'Failed to fetch services due to {e}')
 
     if args.delete_namespace or args.all_objects:
         logging.info("\nChecking labels for Namespaces to delete:")
-        namespaces = core_api.list_namespace(watch=False)
-        for ns in namespaces.items:
-            if ns.metadata.labels is not None:
-                if EXPIRATION_TIME in ns.metadata.labels:
-                    if ns.metadata.labels['expiration_time'].isdigit():
-                        if has_time_passed(epoch_time=int(ns.metadata.labels['expiration_time'])):
-                            logging.info(f'Expiration time is up for {ns.metadata.name} {NAMESPACE}')
-                            delete_object(object_type=NAMESPACE, namespace=ns.metadata.name,
-                                          object_name=ns.metadata.name, apps_api=apps_api, core_api=core_api)
+        try:
+            namespaces = core_api.list_namespace(watch=False)
+            for ns in namespaces.items:
+                if ns.metadata.labels is not None:
+                    if EXPIRATION_TIME in ns.metadata.labels:
+                        if ns.metadata.labels['expiration_time'].isdigit():
+                            if has_time_passed(epoch_time=int(ns.metadata.labels['expiration_time'])):
+                                logging.info(f'Expiration time is up for {ns.metadata.name} {NAMESPACE}')
+                                delete_object(object_type=NAMESPACE, namespace=ns.metadata.name,
+                                              object_name=ns.metadata.name, apps_api=apps_api, core_api=core_api)
+        except client.exceptions.ApiException as e:
+            logging.error(f'Failed to fetch namespaces due to {e}')
 
 
 if __name__ == '__main__':
