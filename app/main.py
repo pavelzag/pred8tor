@@ -1,4 +1,5 @@
 import argparse
+import distutils
 import logging
 import os
 import pathlib
@@ -6,20 +7,21 @@ import platform
 import sys
 import time
 
-from kubernetes import client, config
+from kubernetes import client
 
 from k8s_client.api_client import K8sApiClient
 
+LOG_FILE_NAME = 'pred8tor.log'
 if platform.system().upper() == 'DARWIN':
-    log_file = pathlib.Path(os.getcwd(), 'pred8tor.log')
+    log_file = pathlib.Path(os.getcwd(), LOG_FILE_NAME)
 else:
-    log_file = '/var/log/pred8tor.log'
+    log_file = f'/var/log/{LOG_FILE_NAME}'
 
 # Configure the logger to write to the log file and stdout
 logging.basicConfig(filename=log_file, level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 stdout_handler = logging.StreamHandler(sys.stdout)
-stdout_handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
-logging.getLogger().addHandler(stdout_handler)
+if not logging.getLogger().hasHandlers():
+    logging.getLogger().addHandler(stdout_handler)
 
 POD = 'pod'
 DEPLOYMENT = 'deployment'
@@ -64,23 +66,32 @@ def delete_object(object_type: str, namespace: str, object_name: str, apps_api, 
 
 def main():
     parser = argparse.ArgumentParser(description='Kubernetes object management script')
-    parser.add_argument('--all-objects', action='store_true', help='Delete all objects', default=True)
-    parser.add_argument('--delete-deployment', action='store_true', help='Delete deployments', default=False)
-    parser.add_argument('--delete-pod', action='store_true', help='Delete pods', default=False)
-    parser.add_argument('--delete-service', action='store_true', help='Delete services', default=False)
-    parser.add_argument('--delete-namespace', action='store_true', help='Delete namespaces', default=False)
-    parser.add_argument('--debug-mode', action='store_true', help='Debug Mode', default=True)
-    parser.add_argument('--in-cluster-mode', action='store_true', help='InCluster Mode', default=True)
-    parser.add_argument('--context-name', action='store_true', help='Cluster Name', default="default")
+    parser.add_argument('--all-objects', action='store', help='Delete all objects', default="true")
+    parser.add_argument('--delete-deployment', action='store', help='Delete deployments', default="false")
+    parser.add_argument('--delete-pod', action='store', help='Delete pods', default="false")
+    parser.add_argument('--delete-service', action='store', help='Delete services', default="false")
+    parser.add_argument('--delete-namespace', action='store', help='Delete namespaces', default="false")
+    parser.add_argument('--debug-mode', action='store', help='Debug Mode', default="true")
+    parser.add_argument('--in-cluster-mode', action='store', help='InCluster Mode', default="true")
+    parser.add_argument('--context-name', action='store', help='Cluster Name', default="default")
 
     args = parser.parse_args()
-    k8s_api = K8sApiClient(in_cluster_mode=args.in_cluster_mode, context_name=args.context_name,
-                           debug_mode=args.debug_mode)
+    all_objects = bool(distutils.util.strtobool(args.all_objects))
+    delete_deployment = bool(distutils.util.strtobool(args.delete_deployment))
+    delete_pod = bool(distutils.util.strtobool(args.delete_pod))
+    delete_service = bool(distutils.util.strtobool(args.delete_service))
+    delete_namespace = bool(distutils.util.strtobool(args.delete_namespace))
+    debug_mode = bool(distutils.util.strtobool(args.debug_mode))
+    in_cluster_mode = bool(distutils.util.strtobool(args.in_cluster_mode))
+    context_name = args.context_name
+
+    k8s_api = K8sApiClient(in_cluster_mode, context_name,
+                           debug_mode)
     api_client = k8s_api.fetch_api_client()
     core_api = client.CoreV1Api(api_client=api_client)
     apps_api = client.AppsV1Api(api_client=api_client)
 
-    if args.delete_deployment or args.all_objects:
+    if delete_deployment or all_objects:
         logging.info("\nChecking labels for Deployments to delete:")
         try:
             deployments = apps_api.list_deployment_for_all_namespaces(watch=False)
@@ -95,7 +106,7 @@ def main():
         except client.exceptions.ApiException as e:
             logging.error(f'Failed to fetch deployments due to {e}')
 
-    if args.delete_pod or args.all_objects:
+    if delete_pod or all_objects:
         logging.info("\nChecking labels for Namespace to delete:")
         try:
             pods = core_api.list_pod_for_all_namespaces(watch=False)
@@ -111,7 +122,7 @@ def main():
         except client.exceptions.ApiException as e:
             logging.error(f'Failed to fetch pods due to {e}')
 
-    if args.delete_service or args.all_objects:
+    if delete_service or all_objects:
         logging.info("\nChecking labels for Services to delete:")
         try:
             services = core_api.list_service_for_all_namespaces(watch=False)
@@ -126,7 +137,7 @@ def main():
         except client.exceptions.ApiException as e:
             logging.error(f'Failed to fetch services due to {e}')
 
-    if args.delete_namespace or args.all_objects:
+    if delete_namespace or all_objects:
         logging.info("\nChecking labels for Namespaces to delete:")
         try:
             namespaces = core_api.list_namespace(watch=False)
