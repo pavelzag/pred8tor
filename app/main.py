@@ -39,24 +39,25 @@ def has_time_passed(epoch_time: int) -> bool:
 def delete_object(object_type: str, namespace: str, object_name: str, apps_api, core_api) -> None:
     try:
         if object_type == DEPLOYMENT:
-            response = apps_api.delete_namespaced_deployment(
+
+            apps_api.delete_namespaced_deployment(
                 name=object_name,
                 namespace=namespace,
                 body=client.V1DeleteOptions(
-                    propagation_policy='Foreground',  # Ensures all dependent objects are deleted
-                    grace_period_seconds=5  # Time to wait before shutting down
+                    propagation_policy='Foreground',
+                    grace_period_seconds=5
                 )
             )
             logging.info(f"Deployment {object_name} deleted")
         elif object_type == POD:
-            response = core_api.delete_namespaced_pod(name=object_name, namespace=namespace)
-            logging.info(f"Pod {object_name} deleted. Status: {response.status}")
+            core_api.delete_namespaced_pod(name=object_name, namespace=namespace)
+            logging.info(f"Pod {object_name} deleted")
         elif object_type == SERVICE:
-            response = core_api.delete_namespaced_service(name=object_name, namespace=namespace)
-            logging.info(f"Service {object_name} deleted. Status: {response.status}")
+            core_api.delete_namespaced_service(name=object_name, namespace=namespace)
+            logging.info(f"Service {object_name} deleted")
         elif object_type == NAMESPACE:
-            response = core_api.delete_namespace(name=object_name)
-            logging.info(f"Namespace {object_name} deleted. Status: {response.status}")
+            core_api.delete_namespace(name=object_name)
+            logging.info(f"Namespace {object_name} deleted")
     except client.exceptions.ApiException as e:
         logging.error(f"Exception when deleting {object_type}: {e}")
 
