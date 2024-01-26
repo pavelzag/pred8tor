@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pred8tor
+  namespace: pred8tor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pred8tor
+  template:
+    metadata:
+      labels:
+        app: pred8tor
+    spec:
+      containers:
+      - name: pred8tor
+        image: pavelzagalsky/pred8tor:1.0.0.
+        imagePullPolicy: IfNotPresent
