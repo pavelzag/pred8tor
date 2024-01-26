@@ -6,6 +6,7 @@ import pathlib
 import platform
 import sys
 import time
+from distutils import util
 
 from kubernetes import client
 
@@ -76,13 +77,13 @@ def main():
     parser.add_argument('--context-name', action='store', help='Cluster Name', default="default")
 
     args = parser.parse_args()
-    all_objects = bool(distutils.util.strtobool(args.all_objects))
-    delete_deployment = bool(distutils.util.strtobool(args.delete_deployment))
-    delete_pod = bool(distutils.util.strtobool(args.delete_pod))
-    delete_service = bool(distutils.util.strtobool(args.delete_service))
-    delete_namespace = bool(distutils.util.strtobool(args.delete_namespace))
-    debug_mode = bool(distutils.util.strtobool(args.debug_mode))
-    in_cluster_mode = bool(distutils.util.strtobool(args.in_cluster_mode))
+    all_objects = bool(util.strtobool(args.all_objects))
+    delete_deployment = bool(util.strtobool(args.delete_deployment))
+    delete_pod = bool(util.strtobool(args.delete_pod))
+    delete_service = bool(util.strtobool(args.delete_service))
+    delete_namespace = bool(util.strtobool(args.delete_namespace))
+    debug_mode = bool(util.strtobool(args.debug_mode))
+    in_cluster_mode = bool(util.strtobool(args.in_cluster_mode))
     context_name = args.context_name
 
     k8s_api = K8sApiClient(in_cluster_mode, context_name,
