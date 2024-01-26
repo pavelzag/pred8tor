@@ -1,3 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pred8tor
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,5 +21,5 @@ spec:
     spec:
       containers:
       - name: pred8tor
-        image: pavelzagalsky/pred8tor:1.0.0.
+        image: pavelzagalsky/pred8tor:1.0.0
         imagePullPolicy: IfNotPresent
