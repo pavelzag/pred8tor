@@ -1,9 +1,10 @@
+---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: pred8tor
----
 
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,11 +22,11 @@ spec:
     spec:
       serviceAccountName: pred8tor
       containers:
-      - name: pred8tor
-        image: pavelzagalsky/pred8tor:1.0.0
-        imagePullPolicy: Always
----
+        - name: pred8tor
+          image: pavelzagalsky/pred8tor:1.0.0
+          imagePullPolicy: Always
 
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -39,9 +40,12 @@ kind: ClusterRole
 metadata:
   name: pred8tor
 rules:
-- apiGroups: ["*"]
-  resources: ["*"]
-  verbs: ["*"]
+  - apiGroups:
+      - "*"
+    resources:
+      - "*"
+    verbs:
+      - "*"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -49,9 +53,9 @@ kind: ClusterRoleBinding
 metadata:
   name: pred8tor
 subjects:
-- kind: ServiceAccount
-  name: pred8tor
-  namespace: pred8tor
+  - kind: ServiceAccount
+    name: pred8tor
+    namespace: pred8tor
 roleRef:
   kind: ClusterRole
   name: pred8tor
