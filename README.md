@@ -12,7 +12,7 @@ kubectl label pods ubuntu expiration_time=1706255118
 ```
 
 This will set the expiration time for the labeled object to the mentioned epoch time which is:
-Saturday, January 27, 2024 11:29:50 AM
+`Saturday, January 27, 2024 11:29:50 AM`
 When that time arrives, Pred8tor will terminate this specific pod object.
 
 At the moment, Pred8tor allows termination of the following objects: [deployment, pod, namespace, service] and more to come!
