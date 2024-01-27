@@ -21,9 +21,5 @@ jobs:
 
     - name: Build the Docker image
       run: |
-        ls
-        pwd
         cd app
-        ls
-        pwd
         docker build . --file Dockerfile --tag pavelzagalsky/pred8tor:$(date +%s)
