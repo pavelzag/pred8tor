@@ -15,6 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: pwd |
-        ls |
+      run: |
+        ls
+        pwd
         docker build . --file app/Dockerfile --tag pavelzagalsky/pred8tor:$(date +%s)
