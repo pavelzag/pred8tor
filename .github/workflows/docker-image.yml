@@ -22,4 +22,4 @@ jobs:
     - name: Build the Docker image
       run: |
         cd app
-        docker build . --file Dockerfile --tag pavelzagalsky/pred8tor:$(date +%s)
+        docker buildx build --push --platform linux/arm64,linux/amd64 --file Dockerfile --tag pavelzagalsky/pred8tor:$(date +%s) .
