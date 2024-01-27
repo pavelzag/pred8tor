@@ -4,7 +4,7 @@ Pred8tor is a simple tool to clean up K8s objects that were tagged for expiratio
 ![Pred8tor Logo](documentation/pred8tor_logo.png)
 
 ## Description
-Pred8tor is an innovative open-source tool designed for maintaining clean and tidy Kubernetes environments. 
+Pred8tor is an innovative open-source Python based tool designed for maintaining clean and tidy Kubernetes environments. 
 To trigger Pred8tor's action simply add similar label to a Kubernetes object:
 
 ```shell
