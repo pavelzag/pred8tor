@@ -18,4 +18,5 @@ jobs:
       run: |
         ls
         pwd
-        docker build . --file app/Dockerfile --tag pavelzagalsky/pred8tor:$(date +%s)
+        cd app
+        docker build . --file Dockerfile --tag pavelzagalsky/pred8tor:$(date +%s)
