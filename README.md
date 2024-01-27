@@ -40,7 +40,7 @@ In order to contribute please do the following:
 6. Create a new Pull Request and tag me for a review
 
 # Running locally
-Running pred8tor locally is very simple!
+Running Pred8tor locally is very simple!
 1. Fork the repository.
 2. Create a new branch (git checkout -b feature-branch).
 3. Create a new Python virtual env:
