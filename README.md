@@ -4,8 +4,8 @@ Pred8tor is a simple tool to clean up K8s objects that were tagged for expiratio
 ![Pred8tor Logo](documentation/pred8tor_logo.png)
 
 ## Description
-pred8tor is an innovative open-source tool designed for maintaining clean and tidy Kubernetes environments. 
-To trigger pred8tor's action simply add similar label to a Kubernetes object:
+Pred8tor is an innovative open-source tool designed for maintaining clean and tidy Kubernetes environments. 
+To trigger Pred8tor's action simply add similar label to a Kubernetes object:
 
 ```shell
 kubectl label pods ubuntu expiration_time=1706255118
@@ -13,23 +13,23 @@ kubectl label pods ubuntu expiration_time=1706255118
 
 This will set the expiration time for the labeled object to the mentioned epoch time which is:
 Saturday, January 27, 2024 11:29:50 AM
-When that time arrives, pred8tor will terminate this specific pod object.
+When that time arrives, Pred8tor will terminate this specific pod object.
 
 At the moment, Pred8tor allows termination of the following objects: [deployment, pod, namespace, service] and more to come!
 
 ## Features
-pred8tor identifies and removes expired Kubernetes objects using "expiration_time" label with a corresponding timestamp value.
+Pred8tor identifies and removes expired Kubernetes objects using "expiration_time" label with a corresponding timestamp value.
 it ensures the safe deletion of identified objects.
 
 ## Installation
-To install pred8tor, you can clone the repository and run the following command from project's root:
+To install Pred8tor, you can clone the repository and run the following command from project's root:
 
 ```shell
 kubectl apply -f deployment/pred8tor_deployment.yaml
 ```
 
 ## Developing
-pred8tor is free for use and contribution!
+Pred8tor is free for use and contribution.
 In order to contribute please do the following:
 
 1. Fork the repository.
