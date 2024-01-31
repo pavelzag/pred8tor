@@ -26,10 +26,10 @@ spec:
         expiration_time: "1706263086"
     spec:
       containers:
-      - name: nginx
-        image: nginx:latest
-        ports:
-        - containerPort: 80
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
 
 ---
 
@@ -48,3 +48,90 @@ spec:
       port: 80
       targetPort: 80
   type: NodePort
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+
+  name: busybox-daemonset
+  labels:
+    expiration_time: "1706448655"
+spec:
+  selector:
+    matchLabels:
+      name: busybox-pod
+  template:
+    metadata:
+      labels:
+        name: busybox-pod
+        expiration_time: "1706448655"
+    spec:
+      containers:
+        - name: busybox-container
+          image: busybox
+          args:
+            - "/bin/sh"
+            - "-c"
+            - "while true; do sleep 3600; done"
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: example-applicationset
+  labels:
+    expiration_time: "1706448655"
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: in-cluster
+            url: https://kubernetes.default.svc
+  template:
+    metadata:
+      name: '{{cluster}}-guestbook'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/argoproj/argocd-example-apps.git
+        targetRevision: HEAD
+        path: guestbook
+      destination:
+        server: '{{url}}'
+        namespace: guestbook
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: httpd-applicationset
+  namespace: argocd
+  labels:
+    expiration_time: "1706448655"
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: development
+            url: https://development-cluster-api-url
+          - cluster: staging
+            url: https://staging-cluster-api-url
+          - cluster: production
+            url: https://production-cluster-api-url
+  template:
+    metadata:
+      name: '{{cluster}}-httpd'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://your-git-repository-url.git'
+        targetRevision: HEAD
+        path: path/to/your/httpd/application
+      destination:
+        server: '{{url}}'
+        namespace: your-namespace
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
